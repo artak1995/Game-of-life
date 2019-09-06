@@ -1,0 +1,21 @@
+{
+  "name": "game-of-life-server",
+  "version": "1.0.0",
+  "main": "app.js",
+  "author": "billy",
+  "license": "MIT",
+  "scripts": {
+    "start": "nodemon --exec babel-node src/app.js"
+  },
+  "dependencies": {
+    "express": "^4.17.1",
+    "socket.io": "^2.2.0"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.6.0",
+    "@babel/core": "^7.6.0",
+    "@babel/node": "^7.6.1",
+    "@babel/preset-env": "^7.6.0",
+    "nodemon": "^1.19.2"
+  }
+}
