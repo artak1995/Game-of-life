@@ -1,7 +1,12 @@
 import { all, call, put, takeLatest, take } from 'redux-saga/effects';
 import { eventChannel } from 'redux-saga';
 import io from 'socket.io-client';
-import { CONNECT_SOCKET, UPDATE_GAME_DATA } from './actions';
+import {
+  CONNECT_SOCKET,
+  UPDATE_GAME_DATA,
+  SEND_START_GAME_REQUEST,
+  SEND_END_GAME_REQUEST,
+} from './actions';
 
 const connect = () => {
   const socket = io(':3000');
@@ -15,24 +20,36 @@ const connect = () => {
 const createSocketChannel = socket =>
   eventChannel(emit => {
     const handler = data => {
-      emit(data);
+      emit(data || []);
     };
+
     socket.on('updateGameData', handler);
     return () => {
       socket.off('updateGameData', handler);
     };
   });
 
+function* startGameRequest(socket) {
+  yield socket.emit('start-game');
+}
+
+function* endGameRequest(socket) {
+  yield socket.emit('end-game');
+}
+
 const listenGameDataSaga = function* listenGameDataSaga() {
   // connect to the server
   const socket = yield call(connect);
-
   // then create a socket channel
   const socketChannel = yield call(createSocketChannel, socket);
+
+  yield takeLatest(SEND_START_GAME_REQUEST, startGameRequest, socket);
+  yield takeLatest(SEND_END_GAME_REQUEST, endGameRequest, socket);
 
   // then put the new data into the reducer
   while (true) {
     const payload = yield take(socketChannel);
+    console.log('on updateGameData', payload);
     yield put({ type: UPDATE_GAME_DATA, payload });
   }
 };
