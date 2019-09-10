@@ -13,8 +13,9 @@ const AppContainer = styled.div`
   flex-direction: column;
   align-items: center;
   text-align: center;
-  height: 100vh;
+  min-height: 100vh;
   color: white;
+  padding: 30px 0px;
 `;
 
 const App = () => {

@@ -15,3 +15,11 @@ export function avgcolor(color1, color2) {
       + hex(avg(b(hex1), b(hex2)));
   return res;
 }
+
+export const generateRandomColor = (colors) => {
+  let randomColor = Math.floor(Math.random() * 16777215).toString(16);
+  if (colors.includes(randomColor)) {
+    return generateRandomColor(colors);
+  }
+  return `#${randomColor}`;
+}
