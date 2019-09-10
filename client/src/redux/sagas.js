@@ -6,6 +6,8 @@ import {
   UPDATE_GAME_DATA,
   SEND_START_GAME_REQUEST,
   SEND_END_GAME_REQUEST,
+  SEND_CELL_DATA,
+  SET_SOCKET_COLOR,
 } from './actions';
 
 const connect = () => {
@@ -19,11 +21,12 @@ const connect = () => {
 
 const createSocketChannel = socket =>
   eventChannel(emit => {
-    const handler = data => {
-      emit(data || []);
+    const handler = event => payload => {
+      emit({ event, payload } || []);
     };
 
-    socket.on('updateGameData', handler);
+    socket.on('updateGameData', handler(UPDATE_GAME_DATA));
+    socket.on('setSocketColor', handler(SET_SOCKET_COLOR));
     return () => {
       socket.off('updateGameData', handler);
     };
@@ -37,6 +40,10 @@ function* endGameRequest(socket) {
   yield socket.emit('end-game');
 }
 
+function* updateCellDataRequest(socket, { payload }) {
+  yield socket.emit('update-cell', payload);
+}
+
 const listenGameDataSaga = function* listenGameDataSaga() {
   // connect to the server
   const socket = yield call(connect);
@@ -45,12 +52,13 @@ const listenGameDataSaga = function* listenGameDataSaga() {
 
   yield takeLatest(SEND_START_GAME_REQUEST, startGameRequest, socket);
   yield takeLatest(SEND_END_GAME_REQUEST, endGameRequest, socket);
+  yield takeLatest(SEND_CELL_DATA, updateCellDataRequest, socket);
 
   // then put the new data into the reducer
   while (true) {
-    const payload = yield take(socketChannel);
-    console.log('on updateGameData', payload);
-    yield put({ type: UPDATE_GAME_DATA, payload });
+    const data = yield take(socketChannel);
+    const { event, payload } = data;
+    yield put({ type: event, payload });
   }
 };
 

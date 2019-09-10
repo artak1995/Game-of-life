@@ -8,7 +8,6 @@ const HeaderContainer = styled.div`
   justify-content: center;
   align-items: center;
   height: 50px;
-  margin: 20px 0px;
   font-size: 25px;
 `;
 

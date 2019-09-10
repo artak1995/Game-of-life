@@ -5,7 +5,7 @@ import rootSaga from './sagas';
 
 const sagaMiddleware = createSagaMiddleware();
 
-let composedMiddleware = compose();
+let composedMiddleware = compose(applyMiddleware(sagaMiddleware));
 if (window.devToolsExtension && process.env.NODE_ENV !== 'production') {
   composedMiddleware = compose(
     applyMiddleware(sagaMiddleware),
