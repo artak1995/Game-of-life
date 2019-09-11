@@ -1,4 +1,6 @@
 import cloneDeep from 'lodash/cloneDeep';
+import uniq from 'lodash/uniq';
+import { averageColor } from './utils';
 
 const cols = 20;
 const rows = 30;
@@ -18,7 +20,7 @@ export const initGrid = () => {
     for (let j = 0; j < rows; j++) {
       grid[i][j] = {
         isLive: false,
-        color: 'blue',
+        color: '#000000',
       };
     }
   }
@@ -32,29 +34,43 @@ export const nextGeneration = (grid) => {
   for (let i = 0; i < cols; i++) {
     for (let j = 0; j < rows; j++) {
 
-      let neighbors = 0;
+      let neighbors = [];
 
       // ignore edges
       if (i == 0 || i == cols - 1 || j == 0 || j == rows - 1) {
         continue;
       } else {
-        if (grid[i - 1][j - 1].isLive) neighbors++;
-        if (grid[i - 1][j].isLive) neighbors++;
-        if (grid[i - 1][j + 1].isLive) neighbors++;
-        if (grid[i][j - 1].isLive) neighbors++;
-        if (grid[i][j + 1].isLive) neighbors++;
-        if (grid[i + 1][j - 1].isLive) neighbors++;
-        if (grid[i + 1][j].isLive) neighbors++;
-        if (grid[i + 1][j + 1].isLive) neighbors++;
+        if (grid[i - 1][j - 1].isLive) { neighbors.push(grid[i - 1][j - 1].color); }
+        if (grid[i - 1][j].isLive) { neighbors.push(grid[i - 1][j].color); }
+        if (grid[i - 1][j + 1].isLive) { neighbors.push(grid[i - 1][j + 1].color); }
+        if (grid[i][j - 1].isLive) { neighbors.push(grid[i][j - 1].color); }
+        if (grid[i][j + 1].isLive) { neighbors.push(grid[i][j + 1].color); }
+        if (grid[i + 1][j - 1].isLive) { neighbors.push(grid[i + 1][j - 1].color); }
+        if (grid[i + 1][j].isLive) { neighbors.push(grid[i + 1][j].color); }
+        if (grid[i + 1][j + 1].isLive) { neighbors.push(grid[i + 1][j + 1].color); }
       }
 
 
       // cell go through edges
       // neighbors = countNeighbours(grid, i, j);
 
-      if (!grid[i][j].isLive && neighbors === 3) {
+      // Game of Life Rules
+      if (!grid[i][j].isLive && neighbors.length === 3) {
+        const removeDuplicateNeighbors = uniq(neighbors);
+
+        let color = '';
+        if (removeDuplicateNeighbors.length == 2) {
+          color = averageColor(removeDuplicateNeighbors[0], removeDuplicateNeighbors[1]);
+        } else if (removeDuplicateNeighbors.length == 3) {
+          color = removeDuplicateNeighbors[Math.floor(Math.random() * 3)]
+        } else {
+          color = neighbors[0];
+        }
+
         nextGrid[i][j].isLive = true;
-      } else if (grid[i][j].isLive && (neighbors < 2 || neighbors > 3)) {
+        nextGrid[i][j].color = color;
+
+      } else if (grid[i][j].isLive && (neighbors.length < 2 || neighbors.length > 3)) {
         nextGrid[i][j].isLive = false;
       }
 
