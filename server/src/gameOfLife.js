@@ -91,7 +91,6 @@ export const addTemplate = (grid, { template, color }) => {
   const availableCellIndexes = [];
   const cellTemplate = cellTemplates.find(ct => ct.name === template);
   if (cellTemplate) {
-
     for (let i = 0; i < cols; i++) {
       for (let j = 0; j < rows; j++) {
 
@@ -99,6 +98,7 @@ export const addTemplate = (grid, { template, color }) => {
           continue;
         } else {
           const neighborsToCheck = [];
+          // Check whether the neighbors are available on the grid
           const checkedNeighbors = cellTemplate.indexOfCell.map(cell => {
             const { colIndex, rowIndex } = cell;
             if (isCellAvailable(grid, i, j, colIndex, rowIndex)) {
@@ -117,6 +117,7 @@ export const addTemplate = (grid, { template, color }) => {
     }
 
   }
+  // Pick a random index that is available to add the predefined tempalte 
   if (availableCellIndexes.length > 0) {
     const randomCell = availableCellIndexes[Math.floor(Math.random() * availableCellIndexes.length)];
     const { i, j } = randomCell;
