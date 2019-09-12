@@ -29,6 +29,15 @@ ioServer.on('connection', socket => {
         grid = nextGeneration(grid);
         ioServer.emit('updateGameData', { grid, isGameStarted });
       }, 200);
+      ioServer.to(socket.id).emit('notification', {
+        type: 'success',
+        payload: { message: 'Success', description: 'Game Started Successfully' },
+      });
+    } else {
+      ioServer.to(socket.id).emit('notification', {
+        type: 'error',
+        payload: { message: 'Error', description: 'Game started already' },
+      });
     }
   })
 
@@ -37,6 +46,10 @@ ioServer.on('connection', socket => {
     isGameStarted = false;
     grid = initGrid();
     ioServer.emit('updateGameData', { grid, isGameStarted });
+    ioServer.to(socket.id).emit('notification', {
+      type: 'success',
+      payload: { message: 'Success', description: 'Ended the game successfully' },
+    });
     clearInterval(gameInterval);
   })
 
@@ -58,6 +71,15 @@ ioServer.on('connection', socket => {
     if (!isGameStarted) {
       const newGrid = addTemplate(grid, data);
       ioServer.emit('updateGameData', { grid: newGrid, isGameStarted });
+      ioServer.to(socket.id).emit('notification', {
+        type: 'success',
+        payload: { message: 'Success', description: 'Added Template on grid successfully' },
+      });
+    } else {
+      ioServer.to(socket.id).emit('notification', {
+        type: 'error',
+        payload: { message: 'Error', description: 'Game started already, please try to add after ending the game' },
+      });
     }
   })
 })
