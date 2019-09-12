@@ -1,5 +1,6 @@
 import { all, call, put, takeLatest, take } from 'redux-saga/effects';
 import { eventChannel } from 'redux-saga';
+import { notification } from 'antd';
 import io from 'socket.io-client';
 import {
   CONNECT_SOCKET,
@@ -11,8 +12,18 @@ import {
   SEND_CELL_TEMPLATE,
 } from './actions';
 
+notification.config({
+  placement: 'bottomRight',
+  bottom: 50,
+  duration: 3,
+});
+
 const connect = () => {
   const socket = io(':3000');
+  notification.success({
+    message: 'Connected to server successfully',
+    description: 'Enjoy the game :)',
+  });
   return new Promise(resolve => {
     socket.on('connect', () => {
       resolve(socket);
@@ -28,6 +39,7 @@ const createSocketChannel = socket =>
 
     socket.on('updateGameData', handler(UPDATE_GAME_DATA));
     socket.on('setSocketColor', handler(SET_SOCKET_COLOR));
+    socket.on('notification', ({ type, payload }) => notification[type](payload));
     return () => {
       socket.off('updateGameData', handler);
     };
