@@ -1,7 +1,7 @@
 import express from 'express';
 import http from 'http';
 import io from 'socket.io';
-import { initGrid, nextGeneration } from './gameOfLife';
+import { initGrid, nextGeneration, addTemplate } from './gameOfLife';
 import { generateRandomColor } from './utils';
 
 const app = express();
@@ -36,7 +36,7 @@ ioServer.on('connection', socket => {
     isGameStarted = false;
     grid = initGrid();
     ioServer.emit('updateGameData', { grid, isGameStarted });
-    console.log('game stopped');
+    console.log('[Game of Life Server] Game stopped');
     clearInterval(gameInterval);
   })
 
@@ -50,6 +50,11 @@ ioServer.on('connection', socket => {
       grid[col][row].color = socketColor;
       ioServer.emit('updateGameData', { grid, isGameStarted });
     }
+  })
+
+  socket.on('add-cell-template', data => {
+    const newGrid = addTemplate(grid, data);
+    ioServer.emit('updateGameData', { grid: newGrid, isGameStarted });
   })
 })
 

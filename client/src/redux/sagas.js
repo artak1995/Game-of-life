@@ -8,6 +8,7 @@ import {
   SEND_END_GAME_REQUEST,
   SEND_CELL_DATA,
   SET_SOCKET_COLOR,
+  SEND_CELL_TEMPLATE,
 } from './actions';
 
 const connect = () => {
@@ -44,6 +45,10 @@ function* updateCellDataRequest(socket, { payload }) {
   yield socket.emit('update-cell', payload);
 }
 
+function* addCellTemplateRequest(socket, { payload }) {
+  yield socket.emit('add-cell-template', payload);
+}
+
 const listenGameDataSaga = function* listenGameDataSaga() {
   // connect to the server
   const socket = yield call(connect);
@@ -53,6 +58,7 @@ const listenGameDataSaga = function* listenGameDataSaga() {
   yield takeLatest(SEND_START_GAME_REQUEST, startGameRequest, socket);
   yield takeLatest(SEND_END_GAME_REQUEST, endGameRequest, socket);
   yield takeLatest(SEND_CELL_DATA, updateCellDataRequest, socket);
+  yield takeLatest(SEND_CELL_TEMPLATE, addCellTemplateRequest, socket);
 
   // then put the new data into the reducer
   while (true) {

@@ -2,7 +2,7 @@ import React from 'react';
 import styled from 'styled-components';
 import { connect } from 'react-redux';
 import { compose, withState } from 'recompose';
-import { sendStartGameRequest, sendEndGameRequest } from 'redux/actions';
+import { sendStartGameRequest, sendEndGameRequest, sendCellTemplate } from 'redux/actions';
 import { Button } from 'antd';
 import Modal from 'components/modules/modal';
 import Template from './Template';
@@ -24,6 +24,8 @@ const ControlPanel = ({
   setIsOpen,
   selected,
   setSelected,
+  sendCellTemplate,
+  socketColor,
 }) => {
   return (
     <PanelContainer>
@@ -45,7 +47,7 @@ const ControlPanel = ({
         title="Choose a template to place it on the board!"
         isOpen={isOpen}
         onSubmit={() => {
-          console.log(selected);
+          sendCellTemplate({ template: selected, color: socketColor });
           setIsOpen(false);
         }}
         onCancel={() => setIsOpen(false)}
@@ -60,8 +62,10 @@ const enhance = compose(
   withState('isOpen', 'setIsOpen', false),
   withState('selected', 'setSelected', ''),
   connect(
-    null,
-    { sendStartGameRequest, sendEndGameRequest }
+    state => ({
+      socketColor: state.socketColor,
+    }),
+    { sendStartGameRequest, sendEndGameRequest, sendCellTemplate }
   )
 );
 
