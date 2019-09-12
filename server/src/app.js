@@ -15,15 +15,16 @@ let isGameStarted = false;
 let colors = [];
 
 ioServer.on('connection', socket => {
-  console.log('[Game of Life Server] Client connected');
+  // Client Connected Successfully
+  // Assign a random color to the socket connected
   const socketColor = generateRandomColor(colors);
   ioServer.to(socket.id).emit('setSocketColor', socketColor);
   ioServer.emit('updateGameData', { grid, isGameStarted });
 
+  // Emit new generation every 0.2s when user started the game
   socket.on('start-game', () => {
     if (!isGameStarted) {
       isGameStarted = true;
-      console.log('[Game of Life Server] Recieved start game request');
       gameInterval = setInterval(() => {
         grid = nextGeneration(grid);
         ioServer.emit('updateGameData', { grid, isGameStarted });
@@ -31,14 +32,15 @@ ioServer.on('connection', socket => {
     }
   })
 
+  // Reinitialize the grid and send to connected sockets
   socket.on('end-game', () => {
     isGameStarted = false;
     grid = initGrid();
     ioServer.emit('updateGameData', { grid, isGameStarted });
-    console.log('[Game of Life Server] Game stopped');
     clearInterval(gameInterval);
   })
 
+  // Clients can add or delete live cells when game is not started
   socket.on('update-cell', data => {
     if (!isGameStarted) {
       const { col, row, isLive, socketColor } = data;
@@ -51,6 +53,7 @@ ioServer.on('connection', socket => {
     }
   })
 
+  // Clients can add a predefined cell template when game is not started
   socket.on('add-cell-template', data => {
     if (!isGameStarted) {
       const newGrid = addTemplate(grid, data);
