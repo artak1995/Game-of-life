@@ -21,4 +21,7 @@ export const sendEndGameRequest = () => ({ type: SEND_END_GAME_REQUEST });
 
 export const sendCellData = cellProps => ({ type: SEND_CELL_DATA, payload: cellProps });
 
-export const sendCellTemplate = cellTemplateName => ({ type: SEND_CELL_TEMPLATE, payload: cellTemplateName });
+export const sendCellTemplate = cellTemplateName => ({
+  type: SEND_CELL_TEMPLATE,
+  payload: cellTemplateName,
+});
