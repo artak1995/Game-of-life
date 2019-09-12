@@ -1,5 +1,6 @@
 import cloneDeep from 'lodash/cloneDeep';
 import uniq from 'lodash/uniq';
+import cellTemplates from './template';
 import { averageColor } from './utils';
 
 const cols = 20;
@@ -36,7 +37,7 @@ export const nextGeneration = (grid) => {
 
       let neighbors = [];
 
-      // ignore edges
+      // ignore edges for avoiding overflow
       if (i == 0 || i == cols - 1 || j == 0 || j == rows - 1) {
         continue;
       } else {
@@ -49,10 +50,6 @@ export const nextGeneration = (grid) => {
         if (grid[i + 1][j].isLive) { neighbors.push(grid[i + 1][j].color); }
         if (grid[i + 1][j + 1].isLive) { neighbors.push(grid[i + 1][j + 1].color); }
       }
-
-
-      // cell go through edges
-      // neighbors = countNeighbours(grid, i, j);
 
       // Game of Life Rules
       if (!grid[i][j].isLive && neighbors.length === 3) {
@@ -81,16 +78,54 @@ export const nextGeneration = (grid) => {
 
 };
 
-const countNeighbours = (grid, x, y) => {
-  let neighbors = 0;
-  for (let i = -1; i < 2; i++) {
-    for (let j = -1; j < 2; j++) {
-      const col = (x + i + cols) % cols;
-      const row = (y + j + rows) % rows;
-      neighbors += grid[col][row].isLive;
-    }
+const isCellAvailable = (grid, col, row, colIndex, rowIndex) => {
+  const neighborColIndex = col + colIndex;
+  const neighborRowIndex = row + rowIndex;
+  if (neighborColIndex > 0 && neighborColIndex < cols && neighborRowIndex > 0 && neighborRowIndex < rows && !grid[neighborColIndex][neighborRowIndex].isLive) {
+    return true;
   }
+  return false;
+}
 
-  neighbors -= grid[x][y].isLive;
-  return neighbors;
+export const addTemplate = (grid, { template, color }) => {
+  const availableCellIndexes = [];
+  const cellTemplate = cellTemplates.find(ct => ct.name === template);
+  if (cellTemplate) {
+
+    for (let i = 0; i < cols; i++) {
+      for (let j = 0; j < rows; j++) {
+
+        if (i == 0 || i == cols - 1 || j == 0 || j == rows - 1) {
+          continue;
+        } else {
+          const neighborsToCheck = [];
+          const checkedNeighbors = cellTemplate.indexOfCell.map(cell => {
+            const { colIndex, rowIndex } = cell;
+            if (isCellAvailable(grid, i, j, colIndex, rowIndex)) {
+              neighborsToCheck.push(cell);
+            };
+            return isCellAvailable(grid, i, j, colIndex, rowIndex);
+          })
+          if (checkedNeighbors.includes(false)) {
+            continue;
+          } else {
+            availableCellIndexes.push({ i, j });
+            break;
+          }
+        }
+      }
+    }
+
+  }
+  if (availableCellIndexes.length > 0) {
+    const randomCell = availableCellIndexes[Math.floor(Math.random() * availableCellIndexes.length)];
+    const { i, j } = randomCell;
+    cellTemplate.indexOfCell.forEach(({ colIndex, rowIndex }) => {
+      const neighborColIndex = i + colIndex;
+      const neighborRowIndex = j + rowIndex;
+      grid[neighborColIndex][neighborRowIndex].isLive = true;
+      grid[neighborColIndex][neighborRowIndex].color = color;
+    })
+  }
+  return grid;
 }
