@@ -16,7 +16,6 @@ let colors = [];
 
 ioServer.on('connection', socket => {
   console.log('[Game of Life Server] Client connected');
-
   const socketColor = generateRandomColor(colors);
   ioServer.to(socket.id).emit('setSocketColor', socketColor);
   ioServer.emit('updateGameData', { grid, isGameStarted });
@@ -53,8 +52,10 @@ ioServer.on('connection', socket => {
   })
 
   socket.on('add-cell-template', data => {
-    const newGrid = addTemplate(grid, data);
-    ioServer.emit('updateGameData', { grid: newGrid, isGameStarted });
+    if (!isGameStarted) {
+      const newGrid = addTemplate(grid, data);
+      ioServer.emit('updateGameData', { grid: newGrid, isGameStarted });
+    }
   })
 })
 
