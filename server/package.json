@@ -5,11 +5,12 @@
   "author": "billy",
   "license": "MIT",
   "scripts": {
+    "heroku-prebuild": "cd ../client && yarn && yarn build",
     "clean": "rm -rf build && mkdir build",
-    "build": "yarn clean && yarn build-babel && yarn build-react",
+    "build": "yarn clean && yarn build-babel",
     "build-babel": "babel -d ./build ./src -s",
     "build-react": "cd ../client && yarn && yarn build",
-    "start": "yarn build && node ./build/app.js",
+    "start": "yarn build && yarn build-react && node ./build/app.js",
     "dev": "nodemon --exec babel-node src/app.js"
   },
   "dependencies": {
