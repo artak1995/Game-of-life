@@ -20,12 +20,12 @@ notification.config({
 
 const connect = () => {
   const socket = io(':3000');
-  notification.success({
-    message: 'Connected to server successfully',
-    description: 'Enjoy the game :)',
-  });
   return new Promise(resolve => {
     socket.on('connect', () => {
+      notification.success({
+        message: 'Connected to server successfully',
+        description: 'Enjoy the game :)',
+      });
       resolve(socket);
     });
   });

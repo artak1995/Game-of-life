@@ -6,7 +6,7 @@ import { generateRandomColor } from './utils';
 
 const app = express();
 const httpServer = http.createServer(app)
-const port = 3000;
+const port = process.env.port || 3000;
 const ioServer = io(httpServer);
 
 let grid = initGrid();
@@ -63,6 +63,11 @@ ioServer.on('connection', socket => {
       grid[col][row].isLive = !isLive;
       grid[col][row].color = socketColor;
       ioServer.emit('updateGameData', { grid, isGameStarted });
+    } else {
+      ioServer.to(socket.id).emit('notification', {
+        type: 'error',
+        payload: { message: 'Error', description: 'Game started already, please try to add after ending the game' },
+      });
     }
   })
 

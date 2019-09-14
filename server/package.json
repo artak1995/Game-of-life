@@ -5,7 +5,11 @@
   "author": "billy",
   "license": "MIT",
   "scripts": {
-    "start": "nodemon --exec babel-node src/app.js"
+    "clean": "rm -rf build && mkdir build",
+    "build": "yarn clean && yarn build-babel",
+    "build-babel": "babel -d ./build ./src -s",
+    "start": "yarn build && node ./build/app.js",
+    "dev": "nodemon --exec babel-node src/app.js"
   },
   "dependencies": {
     "express": "^4.17.1",
