@@ -1,6 +1,7 @@
 import express from 'express';
 import http from 'http';
 import io from 'socket.io';
+import path from 'path';
 import { initGrid, nextGeneration, addTemplate } from './gameOfLife';
 import { generateRandomColor } from './utils';
 
@@ -88,6 +89,13 @@ ioServer.on('connection', socket => {
     }
   })
 })
+
+const reactBuildPath = path.resolve(__dirname + '/../../client/build')
+app.use('/', express.static(reactBuildPath));
+app.get('*', (req, res) => {
+  const reactAppPath = path.resolve(__dirname + '/../../client/build/index.html');
+  res.sendFile(reactAppPath);
+});
 
 httpServer.listen(port, () => {
   console.log(`[Game of Life Server] listening to ${port}`);
