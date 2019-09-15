@@ -2,6 +2,7 @@ import express from 'express';
 import http from 'http';
 import io from 'socket.io';
 import path from 'path';
+import cloneDeep from 'lodash/cloneDeep';
 import { initGrid, nextGeneration, addTemplate } from './gameOfLife';
 import { generateRandomColor } from './utils';
 
@@ -54,46 +55,36 @@ ioServer.on('connection', socket => {
     clearInterval(gameInterval);
   })
 
-  // Clients can add or delete live cells when game is not started
+  // Clients can add or delete live cells
   socket.on('update-cell', data => {
+    const { col, row, isLive, socketColor } = data;
+    if (isLive && grid[col][row].color !== socketColor) {
+      return;
+    }
+    grid[col][row].color = socketColor;
+    grid[col][row].isLive = !isLive;
     if (!isGameStarted) {
-      const { col, row, isLive, socketColor } = data;
-      if (isLive && grid[col][row].color !== socketColor) {
-        return;
-      }
-      grid[col][row].isLive = !isLive;
-      grid[col][row].color = socketColor;
-      ioServer.emit('updateGameData', { grid, isGameStarted });
-    } else {
-      ioServer.to(socket.id).emit('notification', {
-        type: 'error',
-        payload: { message: 'Error', description: 'Game started already, please try to add after ending the game' },
-      });
+      ioServer.emit('updateGameData', { grid });
     }
   })
 
   // Clients can add a predefined cell template when game is not started
   socket.on('add-cell-template', data => {
+    const newGrid = addTemplate(grid, data);
     if (!isGameStarted) {
-      const newGrid = addTemplate(grid, data);
-      ioServer.emit('updateGameData', { grid: newGrid, isGameStarted });
-      ioServer.to(socket.id).emit('notification', {
-        type: 'success',
-        payload: { message: 'Success', description: 'Added Template on grid successfully' },
-      });
-    } else {
-      ioServer.to(socket.id).emit('notification', {
-        type: 'error',
-        payload: { message: 'Error', description: 'Game started already, please try to add after ending the game' },
-      });
+      ioServer.emit('updateGameData', { grid: newGrid });
     }
+    ioServer.to(socket.id).emit('notification', {
+      type: 'success',
+      payload: { message: 'Success', description: 'Added Template on grid successfully' },
+    });
   })
 })
 
-const reactBuildPath = path.resolve(__dirname + '/../../client/build')
+const reactBuildPath = path.resolve(__dirname + '/../client/build')
 app.use('/', express.static(reactBuildPath));
 app.get('*', (req, res) => {
-  const reactAppPath = path.resolve(__dirname + '/../../client/build/index.html');
+  const reactAppPath = path.resolve(__dirname + '/../client/build/index.html');
   res.sendFile(reactAppPath);
 });
 

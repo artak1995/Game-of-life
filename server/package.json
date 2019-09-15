@@ -1,17 +1,17 @@
 {
   "name": "game-of-life-server",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "main": "app.js",
   "author": "billy",
   "license": "MIT",
   "scripts": {
-    "heroku-prebuild": "cd ../client && yarn && yarn build",
     "clean": "rm -rf build && mkdir build",
-    "build": "yarn clean && yarn build-babel",
+    "build": "yarn clean && yarn build-babel && yarn build-react",
     "build-babel": "babel -d ./build ./src -s",
-    "build-react": "cd ../client && yarn && yarn build",
-    "start": "yarn build && yarn build-react && node ./build/app.js",
-    "dev": "nodemon --exec babel-node src/app.js"
+    "build-react": "cd client && yarn && yarn build",
+    "start": "yarn build && node ./build/app.js",
+    "dev": "nodemon --exec babel-node src/app.js",
+    "heroku-postbuild": "yarn build-react"
   },
   "dependencies": {
     "express": "^4.17.1",
